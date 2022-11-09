@@ -1,10 +1,10 @@
-# AWS Serverless Thumbnail Service
+# AWS Serverless thumbnails service
 
 <img width="1291" alt="docs" src="https://user-images.githubusercontent.com/4117768/200938384-eab53fe6-6fab-4e5d-b192-50517b2502ff.png">
 
 # Requirements
 
--   [Node.js](https://nodejs.org/en/
+-   [Node.js](https://nodejs.org/en/)
 -   [Serverless Framework](https://www.serverless.com/framework/docs/getting-started/)
 -   [AWS Account](https://aws.amazon.com/)
 -   [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
