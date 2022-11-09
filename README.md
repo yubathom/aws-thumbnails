@@ -1,40 +1,21 @@
-<!--
-title: 'AWS Python Example'
-description: 'This template demonstrates how to deploy a Python function running on AWS Lambda using the traditional Serverless Framework.'
-layout: Doc
-framework: v3
-platform: AWS
-language: python
-priority: 2
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
--->
+# AWS Serverless Thumbnail Service
 
+<img width="1291" alt="docs" src="https://user-images.githubusercontent.com/4117768/200938384-eab53fe6-6fab-4e5d-b192-50517b2502ff.png">
 
-# Serverless Framework AWS Python Example
+# Requirements
 
-This template demonstrates how to deploy a Python function running on AWS Lambda using the traditional Serverless Framework. The deployed function does not include any event definitions as well as any kind of persistence (database). For more advanced configurations check out the [examples repo](https://github.com/serverless/examples/) which includes integrations with SQS, DynamoDB or examples of functions that are triggered in `cron`-like manner. For details about configuration of specific `events`, please refer to our [documentation](https://www.serverless.com/framework/docs/providers/aws/events/).
+-   [Node.js](https://nodejs.org/en/
+-   [Serverless Framework](https://www.serverless.com/framework/docs/getting-started/)
+-   [AWS Account](https://aws.amazon.com/)
+-   [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
+-   [Python3.8](https://www.python.org/downloads/release/python-380/)
 
 ## Usage
 
 ### Deployment
 
-In order to deploy the example, you need to run the following command:
-
 ```
-$ serverless deploy
-```
-
-After running deploy, you should see output similar to:
-
-```bash
-Deploying aws-python-project to stage dev (us-east-1)
-
-✔ Service deployed to stack aws-python-project-dev (112s)
-
-functions:
-  hello: aws-python-project-dev-hello (1.5 kB)
+$ sls deploy
 ```
 
 ### Invocation
@@ -42,7 +23,7 @@ functions:
 After successful deployment, you can invoke the deployed function by using the following command:
 
 ```bash
-serverless invoke --function hello
+sls invoke --function health
 ```
 
 Which should result in response similar to the following:
@@ -50,9 +31,11 @@ Which should result in response similar to the following:
 ```json
 {
     "statusCode": 200,
-    "body": "{\"message\": \"Go Serverless v3.0! Your function executed successfully!\", \"input\": {}}"
+    "body": "{\"message\": \"ok\"}"
 }
 ```
+
+Check out the [Serverless Framework docs](https://www.serverless.com/framework/docs/providers/aws/cli-reference/invoke/) for more information.
 
 ### Local development
 

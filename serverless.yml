@@ -42,6 +42,14 @@ custom:
         dockerizePip: true
 
 functions:
+    health:
+        handler: handler.health
+        events:
+            - http:
+                  path: /health
+                  method: get
+                  cors: true
+
     s3_thumbnail_generator:
         handler: handler.s3_thumbnail_generator
         events:

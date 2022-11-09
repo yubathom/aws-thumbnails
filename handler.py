@@ -13,6 +13,19 @@ dbtable = str(os.environ['DYNAMODB_TABLE'])
 dynamodb = boto3.resource('dynamodb')
 
 
+def health(event, context):
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+        },
+        'body': json.dumps({
+            'message': 'ok'
+        })
+    }
+
+
 def get_s3_image(bucket, image):
     reponse = s3.get_object(Bucket=bucket, Key=image)
     imagecontent = reponse['Body'].read()
