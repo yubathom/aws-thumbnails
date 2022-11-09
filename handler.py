@@ -5,6 +5,7 @@ from PIL import Image, ImageOps
 import os
 import uuid
 import json
+from decimal import *
 
 s3 = boto3.client('s3')
 size = int(os.environ['THUMBNAIL_SIZE'])
@@ -93,4 +94,83 @@ def s3_save_thumbnail_url_to_dynamo(url_path, img_size):
             'Content-Type': 'application/json',
         },
         'body': json.dumps(response)
+    }
+
+
+# === get, post, delete, put thumbnail===
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        # 👇️ if passed in object is instance of Decimal
+        # convert it to a string
+        if isinstance(obj, Decimal):
+            return str(obj)
+        # 👇️ otherwise use the default behavior
+        return json.JSONEncoder.default(self, obj)
+
+
+def s3_get_item(event, context):
+    table = dynamodb.Table(dbtable)
+    response = table.get_item(
+        Key={
+            'id': event['pathParameters']['id']
+        }
+    )
+
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+        },
+        'body': json.dumps(response['Item'], cls=DecimalEncoder)
+    }
+
+
+def s3_delete_item(event, context):
+    table = dynamodb.Table(dbtable)
+    response = table.delete_item(
+        Key={
+            'id': event['pathParameters']['id']
+        }
+    )
+
+    if (response['ResponseMetadata']['HTTPStatusCode'] == 200):
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            'body': json.dumps({
+                'message': 'Item deleted successfully',
+                'id': event['pathParameters']['id']
+            })
+        }
+
+    return {
+        'statusCode': 500,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+        },
+        'body': json.dumps(response, cls=DecimalEncoder)
+    }
+
+
+def s3_get_thumbnail_urls(event, context):
+    table = dynamodb.Table(dbtable)
+    response = table.scan()
+    data = response['Items']
+
+    while 'LastEvaluatedKey' in response:
+        response = table.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
+        data.extend(response['Items'])
+
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+        },
+        'body': json.dumps(data, cls=DecimalEncoder)
     }
