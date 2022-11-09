@@ -1,4 +1,4 @@
-service: final-python-thumbnail
+service: thumbnail-service
 
 frameworkVersion: '3'
 
