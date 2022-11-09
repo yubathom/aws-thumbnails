@@ -13,6 +13,7 @@ provider:
     environment:
         THUMBNAIL_SIZE: 128
         REGION_NAME: ${self:provider.region}
+        DYNAMODB_TABLE: ${self:custom.dynamoTable}
 
     iam:
         role:
@@ -21,9 +22,19 @@ provider:
                   Action:
                       - 's3:*'
                   Resource: '*'
+                - Effect: Allow
+                  Action:
+                      - 'dynamodb:Query'
+                      - 'dynamodb:Scan'
+                      - 'dynamodb:GetItem'
+                      - 'dynamodb:PutItem'
+                      - 'dynamodb:UpdateItem'
+                      - 'dynamodb:DeleteItem'
+                  Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}'
 
 custom:
     bucket: thomas-thumbnails
+    dynamoTable: img-url-table
     pythonRequirements:
         dockerizePip: true
 
@@ -37,7 +48,23 @@ functions:
                   rules:
                       - suffix: .png
         layers:
-            - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-Pillow:5
+            - arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-Pillow:5 ## see https://api.klayers.cloud//api/v2/p3.8/layers/latest/us-east-1/json
+
+resources:
+    Resources:
+        ImagesDynamoDBTable:
+            Type: AWS::DynamoDB::Table
+            Properties:
+                AttributeDefinitions:
+                    - AttributeName: id
+                      AttributeType: S
+                KeySchema:
+                    - AttributeName: id
+                      KeyType: HASH
+                ProvisionedThroughput:
+                    ReadCapacityUnits: 1
+                    WriteCapacityUnits: 1
+                TableName: ${self:provider.environment.DYNAMODB_TABLE}
 
 plugins:
     - serverless-python-requirements

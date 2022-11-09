@@ -8,6 +8,8 @@ import json
 
 s3 = boto3.client('s3')
 size = int(os.environ['THUMBNAIL_SIZE'])
+dbtable = str(os.environ['DYNAMODB_TABLE'])
+dynamodb = boto3.resource('dynamodb')
 
 
 def get_s3_image(bucket, image):
@@ -50,14 +52,43 @@ def s3_thumbnail_generator(event, context):
     # parse the event
     print("EVENT:::", event)
 
-    bucket = event['Records'][0]['s3']['bucket']['name']
-    key = event['Records'][0]['s3']['object']['key']
-    img_size = event['Records'][0]['s3']['object']['size']
+    try:
+        bucket = event['Records'][0]['s3']['bucket']['name']
+        key = event['Records'][0]['s3']['object']['key']
+        img_size = event['Records'][0]['s3']['object']['size']
 
-    if (not key.endswith('_thumbnail.png')):
-        image = get_s3_image(bucket, key)
-        thumbnail = image_to_thumbnail(image)
-        thumbnail_key = new_filename(key)
-        url = upload_to_s3(bucket, thumbnail_key, thumbnail, img_size)
+        if (not key.endswith('_thumbnail.png')):
+            image = get_s3_image(bucket, key)
+            thumbnail = image_to_thumbnail(image)
+            thumbnail_key = new_filename(key)
+            url = upload_to_s3(bucket, thumbnail_key, thumbnail, img_size)
 
-        return url
+            return url
+
+    except Exception as e:
+        print(e)
+        print('Error getting object'.format(key, bucket))
+        raise e
+
+
+def s3_save_thumbnail_url_to_dynamo(url_path, img_size):
+    table = dynamodb.Table(dbtable)
+    toint = float(img_size*0.53)/1000
+
+    response = table.put_item(
+        Item={
+            'id': str(uuid.uuid4()),
+            'url': url_path,
+            'size': img_size,
+            'toint': toint,
+            'created_at': str(datetime.now()),
+            'updated_at': str(datetime.now())
+        }
+    )
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json',
+        },
+        'body': json.dumps(response)
+    }
